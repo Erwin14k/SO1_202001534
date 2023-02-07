@@ -21,7 +21,7 @@ body{
   border-radius: 15px;
 }
 
-.keypad{
+.keys{
   display: grid;
   grid-template-columns: repeat(4,1fr);
   grid-auto-rows: minmax(95px,auto);

@@ -36,7 +36,7 @@ function App() {
         <form>
           <input type="text" value={result} readOnly/>
         </form>
-        <div className='keypad'>
+        <div className='keys'>
           <button className='specialButton' onClick={clean} id='clean'><FontAwesomeIcon icon={faBroom} /></button>
           <button className='specialButton' onClick={deleteChar} id='deleteChar'>⌫</button>
           <button className='specialButton' onClick={handleClick} name='/'>&divide;</button>
