@@ -45,7 +45,7 @@ func handleOperate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	expression := data["expression"]
-	fmt.Println(expression)
+	//fmt.Println(expression)
 	if expression == "" {
 		http.Error(w, "Missing expression", http.StatusBadRequest)
 		return
@@ -59,7 +59,10 @@ func handleOperate(w http.ResponseWriter, r *http.Request) {
 	// For loop to obtain the operator position
 	for i = range expression {
 		if expression[i] == '+' || expression[i] == '-' || expression[i] == '*' || expression[i] == '/' {
-			break
+			if i != 0 {
+				break
+			}
+
 		}
 	}
 	// The left operand
