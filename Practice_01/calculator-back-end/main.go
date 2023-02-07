@@ -2,18 +2,33 @@ package main
 
 // Imports
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/rs/cors"
 )
 
 // Main function
 func main() {
-	// Operate endpoint
-	http.HandleFunc("/operate", handleOperate)
-	// Port 8080 listening
+
+	/*	// Operate endpoint
+		http.HandleFunc("/operate", handleOperate)
+		// Port 8080 listening
+		fmt.Println("Listening on port 8080...")
+		http.ListenAndServe(":8080", nil)
+	*/
+	mux := http.NewServeMux()
+	mux.HandleFunc("/operate", handleOperate)
+
+	// Inicia el servidor en el puerto 8080 con CORS habilitado
+	handler := cors.Default().Handler(mux)
 	fmt.Println("Listening on port 8080...")
-	http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", handler)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func handleOperate(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +37,15 @@ func handleOperate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Expression captured
-	expression := r.FormValue("expression")
+	//expression := r.FormValue("expression")
+	var data map[string]string
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+	expression := data["expression"]
+	fmt.Println(expression)
 	if expression == "" {
 		http.Error(w, "Missing expression", http.StatusBadRequest)
 		return

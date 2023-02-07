@@ -9,32 +9,59 @@ import { faBroom } from '@fortawesome/free-solid-svg-icons';
 
 function App() {
   // useState to control the result of the operation.
-  const [result,setResult]=useState("");
+  const [expression,setExpression]=useState("");
 
   // Show selectionated symbols on the operation screen.
   const handleClick=(e)=>{
-    setResult(result.concat(e.target.name));
+    setExpression(expression.concat(e.target.name));
   }
 
   // Clean the operation screen.
   const clean =()=>{
-    setResult("");
+    setExpression("");
   }
 
   // Delete the last symbol founded.
   const deleteChar =()=>{
-    setResult(result.slice(0,result.length-1));
+    setExpression(expression.slice(0,expression.length-1));
   }
   //Calculate expression --> petition to backend.
-  const calculate =()=>{
-    setResult("");
+  const performCalculation = () => {
+    console.log(expression);
+    fetch("http://localhost:8080/operate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ expression }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        calculate(data);
+        return data;
+      })
+      .catch((error) => {
+        console.error(error);
+        return error;
+      });
+  };
+
+  const calculate =(data)=>{
+    console.log(data);
+    if(data!="-1499"){
+      setExpression(data.toString());
+    }else{
+      setExpression("Math Error");
+    }
+    
   }
+  
   return (
     <>
       <h1>Math Calculator</h1>
       <div className='container'>
         <form>
-          <input type="text" value={result} readOnly/>
+          <input type="text" value={expression} readOnly/>
         </form>
         <div className='keys'>
           <button className='specialButton' onClick={clean} id='clean'><FontAwesomeIcon icon={faBroom} /></button>
@@ -54,7 +81,7 @@ function App() {
           <button className='specialButton' onClick={handleClick} name='+'>+</button>
           <button onClick={handleClick} name='0'>0</button>
           <button><FontAwesomeIcon icon={faUserSecret} /></button>
-          <button className='specialButton' id="result">=</button>
+          <button className='specialButton' id="result" onClick={performCalculation}>=</button>
         </div>
       </div>
     </>
