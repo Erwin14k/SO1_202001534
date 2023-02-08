@@ -7,25 +7,19 @@ import (
 	"net/http"
 	"strconv"
 
+	// CORS
 	"github.com/rs/cors"
 )
 
 // Main function
 func main() {
-
-	/*	// Operate endpoint
-		http.HandleFunc("/operate", handleOperate)
-		// Port 8080 listening
-		fmt.Println("Listening on port 8080...")
-		http.ListenAndServe(":8080", nil)
-	*/
 	mux := http.NewServeMux()
 	mux.HandleFunc("/operate", handleOperate)
-
-	// Inicia el servidor en el puerto 8080 con CORS habilitado
+	// Server initialization on port 8080 with CORS enabled.
 	handler := cors.Default().Handler(mux)
 	fmt.Println("Listening on port 8080...")
 	err := http.ListenAndServe(":8080", handler)
+	// In case an error occurs
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -37,7 +31,6 @@ func handleOperate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Expression captured
-	//expression := r.FormValue("expression")
 	var data map[string]string
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
@@ -87,10 +80,10 @@ func handleOperate(w http.ResponseWriter, r *http.Request) {
 		result = num1 * num2
 	// Division
 	case "/":
-		// Invalid Operation
+		// If num2 is 0, is an invalid operation
 		if num2 == 0 {
 			result = -1499
-			// Valid Operation
+
 		} else {
 			result = num1 / num2
 		}
