@@ -2,10 +2,13 @@ package main
 
 // Imports
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	_ "github.com/go-sql-driver/mysql"
 
 	// CORS
 	"github.com/rs/cors"
@@ -13,6 +16,12 @@ import (
 
 // Main function
 func main() {
+	db, dbErr := sql.Open("mysql", "usuario:contraseña@tcp(host:puerto)/nombre_de_la_base_de_datos")
+	if dbErr != nil {
+		fmt.Println(dbErr)
+		return
+	}
+	defer db.Close()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/operate", handleOperate)
 	// Server initialization on port 8080 with CORS enabled.
