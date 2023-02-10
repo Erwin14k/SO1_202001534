@@ -63,6 +63,7 @@ function App() {
       });
   };
 
+  //Get Logs --> petition to backend.
   const getLogs = async () => {
     const response = await fetch("http://localhost:8080/get-logs", {
       method: "GET",
@@ -70,20 +71,20 @@ function App() {
         "Content-Type": "application/json",
       },
     });
+    // Logs from the database
     const logs = await response.json();
-    console.log(logs+",,,");
     return logs;
   };
 
   const updateLogsReport = async () => {
     try {
       var logs = await getLogs();
-      console.log(logs);
+      // Update logs array
       setLogs(logs);
     } catch (error) {
-      console.log("errr")
       console.log(error);
     }
+    // Change to log view
     setCalculatorView(!calculatorView);
   };
 
@@ -130,18 +131,26 @@ function App() {
       </div>
     );
   }else{
-    const logsList = logs.map((log) => {
+    var logsList;
+    if(logs!=null){
+      // logs array Map.
+      logsList = logs.map((log) => {
+      // Appliying a key to each log.
+      if(log.result===-1499){
+        log.result="Error";
+      }
       return (
         <tr key={log.id}> 
           <td>{log.id}</td>
           <td>{log.date_created}</td>
-          <td>{log.right_operand}</td>
-          <td>{log.operator}</td>
-          <td>{log.left_operand}</td>
+          <td style={{textAlign:"center"}}>{log.right_operand}</td>
+          <td style={{textAlign:"center"}}>{log.operator}</td>
+          <td style={{textAlign:"center"}}>{log.left_operand}</td>
           <td>{log.result}</td>
         </tr>
       );
-    });
+      });
+    }
     return (
       <>
         <h1 className={styles.titlesH1}>Math Calculator Logs</h1>
@@ -157,6 +166,7 @@ function App() {
           </tr>
         </thead>
         <tbody>
+          {/* Adding logs to the table*/}
           {logsList}
         </tbody>
       </Table>

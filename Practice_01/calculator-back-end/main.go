@@ -47,11 +47,9 @@ func main() {
 	}
 	// Mysql Version Message
 	fmt.Println("Mysql_Version: " + version)
-	fmt.Println()
-	fmt.Println()
-
 	defer db.Close()
 
+	// Server Configuration
 	mux := http.NewServeMux()
 	mux.HandleFunc("/operate", func(w http.ResponseWriter, r *http.Request) {
 		handleOperate(w, r, db)
@@ -125,117 +123,87 @@ func handleOperate(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Subtraction
 	case "-":
 		result = num1 - num2
+		query := fmt.Sprintf("INSERT INTO logs (right_operand, left_operand, operator, result) VALUES (%d, %d, '%s', %f)", int(num1), int(num2), "-", result)
+		_, err3 := db.Exec(query)
+		if err3 != nil {
+			log.Fatalf("Error, Cannot insert the log: %v", err)
+		}
+		fmt.Println("Log Inserted Successfully :)")
 	// Multiplication
 	case "*":
 		result = num1 * num2
+		query := fmt.Sprintf("INSERT INTO logs (right_operand, left_operand, operator, result) VALUES (%d, %d, '%s', %f)", int(num1), int(num2), "*", result)
+		_, err3 := db.Exec(query)
+		if err3 != nil {
+			log.Fatalf("Error, Cannot insert the log: %v", err)
+		}
+		fmt.Println("Log Inserted Successfully :)")
 	// Division
 	case "/":
 		// If num2 is 0, is an invalid operation
 		if num2 == 0 {
 			result = -1499
-
+			query := fmt.Sprintf("INSERT INTO logs (right_operand, left_operand, operator, result) VALUES (%d, %d, '%s', %f)", int(num1), int(num2), "/", result)
+			_, err3 := db.Exec(query)
+			if err3 != nil {
+				log.Fatalf("Error, Cannot insert the log: %v", err)
+			}
+			fmt.Println("Log Inserted Successfully :)")
 		} else {
 			result = num1 / num2
+			query := fmt.Sprintf("INSERT INTO logs (right_operand, left_operand, operator, result) VALUES (%d, %d, '%s', %f)", int(num1), int(num2), "/", result)
+			_, err3 := db.Exec(query)
+			if err3 != nil {
+				log.Fatalf("Error, Cannot insert the log: %v", err)
+			}
+			fmt.Println("Log Inserted Successfully :)")
 		}
 
 	}
 	fmt.Fprint(w, result)
 }
 
-/*func handleGetLogs(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	fmt.Println("si entramos")
-	rows, err := db.Query("SELECT * FROM logs")
-	if err != nil {
-		http.Error(w, "Error in get_logs Query  :(", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	var logs []LogStruct
-	for rows.Next() {
-		var log LogStruct
-		if err := rows.Scan(&log.ID, &log.LeftOperand, &log.RightOperand, &log.Operator, &log.Result); err != nil {
-			http.Error(w, "Error while scanning logs table records :(", http.StatusInternalServerError)
-			return
-		}
-		logs = append(logs, log)
-	}
-
-	if err := rows.Err(); err != nil {
-		http.Error(w, "Error while processing logs table records :(", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(logs); err != nil {
-		http.Error(w, "Error encoding records from logs table to JSON", http.StatusInternalServerError)
-		return
-	}
-}*/
-
-/*func handleGetLogs(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	rows, err := db.Query("SELECT * FROM logs")
-	if err != nil {
-		fmt.Println("errro111")
-		http.Error(w, "Error in get_logs Query  :(", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	var logs []LogStruct
-	for rows.Next() {
-		var log LogStruct
-		var date string
-		if err := rows.Scan(&log.ID, &log.LeftOperand, &log.RightOperand, &log.Operator, &log.Result, &date); err != nil {
-			fmt.Println("errro222")
-			http.Error(w, "Error while scanning logs table records :(", http.StatusInternalServerError)
-			return
-		}
-		log.Date = date
-		logs = append(logs, log)
-	}
-
-	if err := rows.Err(); err != nil {
-		fmt.Println("errro333")
-		http.Error(w, "Error while processing logs table records :(", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(logs); err != nil {
-		fmt.Println("errro444")
-		http.Error(w, "Error encoding records from logs table to JSON", http.StatusInternalServerError)
-		return
-	}
-}*/
-
 func handleGetLogs(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	// Perform a query to the "logs" table using the db.Query method and store the results in the rows variable.
 	rows, err := db.Query("SELECT * FROM logs")
+	// Check for errors executing the query
 	if err != nil {
 		http.Error(w, "Error in get_logs Query  :(", http.StatusInternalServerError)
 		return
 	}
+	// We use 'defer rows.Close()' to make sure the connection to the database is closed.
 	defer rows.Close()
 
+	//Initialize a slice to hold the logs
 	var logs []LogStruct
+	// Iterate over each row returned by the query
 	for rows.Next() {
+		// Create a LogStruct variable to hold the values from each row
 		var log LogStruct
 		var date string
+		// Scan the values from each row into the LogStruct variable
 		if err := rows.Scan(&log.ID, &log.RightOperand, &log.Operator, &log.LeftOperand, &log.Result, &date); err != nil {
+			// Return a 500 Internal Server Error response with a message indicating the scan error
 			http.Error(w, "Error while scanning logs table records :(", http.StatusInternalServerError)
 			return
 		}
 		log.Date = date
+		// Append the LogStruct to the logs slice
 		logs = append(logs, log)
 	}
 
+	// Check for errors after iterating over all the rows
 	if err := rows.Err(); err != nil {
+		// Return a 500 Internal Server Error response with a message indicating the processing error
 		http.Error(w, "Error while processing logs table records :(", http.StatusInternalServerError)
 		return
 	}
 
+	// Set the Content-Type header to "application/json"
 	w.Header().Set("Content-Type", "application/json")
+	// Encode the logs slice as JSON and write it to the response
 	if err := json.NewEncoder(w).Encode(logs); err != nil {
+		// Return a 500 Internal Server Error response with a message indicating the encoding error
 		http.Error(w, "Error encoding records from logs table to JSON", http.StatusInternalServerError)
 		return
 	}
