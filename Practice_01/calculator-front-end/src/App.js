@@ -14,6 +14,8 @@ import Button from 'react-bootstrap/Button';
 
 
 function App() {
+  // useState to control the logs
+  const [logs, setLogs] = useState([]);
   // useState to control the views
   const [calculatorView,setCalculatorView]=useState(true);
 
@@ -29,11 +31,12 @@ function App() {
   const clean =()=>{
     setExpression("");
   }
-
   // Change view.
   const changeView =()=>{
     setCalculatorView(!calculatorView);
   }
+
+  
 
   // Delete the last symbol founded.
   const deleteChar =()=>{
@@ -58,6 +61,30 @@ function App() {
         console.error(error);
         return error;
       });
+  };
+
+  const getLogs = async () => {
+    const response = await fetch("http://localhost:8080/get-logs", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const logs = await response.json();
+    console.log(logs+",,,");
+    return logs;
+  };
+
+  const updateLogsReport = async () => {
+    try {
+      var logs = await getLogs();
+      console.log(logs);
+      setLogs(logs);
+    } catch (error) {
+      console.log("errr")
+      console.log(error);
+    }
+    setCalculatorView(!calculatorView);
   };
 
   const calculate =(data)=>{
@@ -96,13 +123,25 @@ function App() {
             <button className={styles.normalButton}  onClick={handleClick} name='3'>3</button>
             <button className={styles.specialButton} onClick={handleClick} name='+'>+</button>
             <button className={styles.normalButton}  onClick={handleClick} name='0'>0</button>
-            <button className={styles.normalButton}><FontAwesomeIcon icon={faUserSecret}  onClick={changeView}/></button>
+            <button className={styles.normalButton}><FontAwesomeIcon icon={faUserSecret}  onClick={updateLogsReport}/></button>
             <button className={styles.result} onClick={performCalculation}>=</button>
           </div>
         </div>
       </div>
     );
   }else{
+    const logsList = logs.map((log) => {
+      return (
+        <tr key={log.id}> 
+          <td>{log.id}</td>
+          <td>{log.date_created}</td>
+          <td>{log.right_operand}</td>
+          <td>{log.operator}</td>
+          <td>{log.left_operand}</td>
+          <td>{log.result}</td>
+        </tr>
+      );
+    });
     return (
       <>
         <h1 className={styles.titlesH1}>Math Calculator Logs</h1>
@@ -118,8 +157,7 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          <tr>
-          </tr>
+          {logsList}
         </tbody>
       </Table>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
