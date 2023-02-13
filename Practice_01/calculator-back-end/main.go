@@ -30,7 +30,7 @@ type LogStruct struct {
 func main() {
 
 	// DB connection
-	db, dbErr := sql.Open("mysql", "root:@{}Ee[]#$#$#$14kFer@tcp(127.0.0.1:3306)/Calculator")
+	db, dbErr := sql.Open("mysql", "root:calcpass@tcp(db:3306)/Calculator")
 	// Verify the DB Connection
 	if dbErr != nil {
 		log.Fatalf("Error Connection To the Database: %v", dbErr)
