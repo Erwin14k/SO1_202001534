@@ -1,0 +1,27 @@
+version: "3.7"
+services:
+  db:
+    restart: always
+    image: mysql:8.0.32
+    environment:
+      MYSQL_ROOT_PASSWORD: calcpass
+      MYSQL_DATABASE: Calculator
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d
+  frontend:
+    restart: always
+    image: erwin14k/calculator-front-end:1.00
+    ports:
+      - "3000:3000"
+  backend:
+    restart: always
+    image: erwin14k/calculator_back_end:1.00
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+volumes:
+  db-data:

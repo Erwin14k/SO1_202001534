@@ -19,10 +19,12 @@ COPY . .
 RUN go mod download
 
 # Compile the application
-RUN go build
+RUN go build -o ./app .
 
 # Expose the port
 EXPOSE 8080
 
 # Specify the command to start our application
 CMD ["./app"]
+
+
