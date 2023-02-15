@@ -13,6 +13,8 @@ import (
 	// CORS
 	"log"
 
+	"os"
+
 	"github.com/rs/cors"
 )
 
@@ -164,6 +166,16 @@ func handleOperate(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func handleGetLogs(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+
+	// Generathe the file
+	file, err := os.Create("/app/Backend/logs.txt")
+	if err != nil {
+		fmt.Println("Error creating the file: ", err)
+		os.Exit(1)
+	}
+	defer file.Close()
+
+
 	// Perform a query to the "logs" table using the db.Query method and store the results in the rows variable.
 	rows, err := db.Query("SELECT * FROM logs")
 	// Check for errors executing the query
@@ -174,15 +186,44 @@ func handleGetLogs(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// We use 'defer rows.Close()' to make sure the connection to the database is closed.
 	defer rows.Close()
 
+	
+
+	// Write each log on the file
+	for rows.Next() {
+		var logReport LogStruct
+		var dateReport string
+		if err := rows.Scan(&logReport.ID, &logReport.RightOperand, &logReport.Operator, &logReport.LeftOperand, &logReport.Result, &dateReport); err != nil {
+			fmt.Println("Error reading the register: ", err)
+			os.Exit(1)
+		}
+		file.WriteString(fmt.Sprintf("%s,%f\n", logReport.Operator, logReport.Result))
+	}
+	if err := rows.Err(); err != nil {
+		fmt.Println("Error processing the registers: ", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Logs file updated successfully!!")
+
+	// Perform a query to the "logs" table using the db.Query method and store the results in the rows variable.
+	rows2, err2 := db.Query("SELECT * FROM logs")
+	// Check for errors executing the query
+	if err2 != nil {
+		http.Error(w, "Error in get_logs Query  :(", http.StatusInternalServerError)
+		return
+	}
+	// We use 'defer rows.Close()' to make sure the connection to the database is closed.
+	defer rows2.Close()
+
 	//Initialize a slice to hold the logs
 	var logs []LogStruct
 	// Iterate over each row returned by the query
-	for rows.Next() {
+	for rows2.Next() {
 		// Create a LogStruct variable to hold the values from each row
 		var log LogStruct
 		var date string
 		// Scan the values from each row into the LogStruct variable
-		if err := rows.Scan(&log.ID, &log.RightOperand, &log.Operator, &log.LeftOperand, &log.Result, &date); err != nil {
+		if err := rows2.Scan(&log.ID, &log.RightOperand, &log.Operator, &log.LeftOperand, &log.Result, &date); err != nil {
 			// Return a 500 Internal Server Error response with a message indicating the scan error
 			http.Error(w, "Error while scanning logs table records :(", http.StatusInternalServerError)
 			return
@@ -193,7 +234,7 @@ func handleGetLogs(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	// Check for errors after iterating over all the rows
-	if err := rows.Err(); err != nil {
+	if err := rows2.Err(); err != nil {
 		// Return a 500 Internal Server Error response with a message indicating the processing error
 		http.Error(w, "Error while processing logs table records :(", http.StatusInternalServerError)
 		return
