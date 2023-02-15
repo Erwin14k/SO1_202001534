@@ -6,6 +6,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: calcpass
       MYSQL_DATABASE: Calculator
+      TZ: America/Guatemala
     ports:
       - "3306:3306"
     volumes:
