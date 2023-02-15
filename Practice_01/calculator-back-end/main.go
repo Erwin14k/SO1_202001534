@@ -175,7 +175,6 @@ func handleGetLogs(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	defer file.Close()
 
-
 	// Perform a query to the "logs" table using the db.Query method and store the results in the rows variable.
 	rows, err := db.Query("SELECT * FROM logs")
 	// Check for errors executing the query
@@ -186,8 +185,6 @@ func handleGetLogs(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// We use 'defer rows.Close()' to make sure the connection to the database is closed.
 	defer rows.Close()
 
-	
-
 	// Write each log on the file
 	for rows.Next() {
 		var logReport LogStruct
@@ -196,7 +193,7 @@ func handleGetLogs(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			fmt.Println("Error reading the register: ", err)
 			os.Exit(1)
 		}
-		file.WriteString(fmt.Sprintf("%s,%f\n", logReport.Operator, logReport.Result))
+		file.WriteString(fmt.Sprintf("%s,%s,%f\n", dateReport, logReport.Operator, logReport.Result))
 	}
 	if err := rows.Err(); err != nil {
 		fmt.Println("Error processing the registers: ", err)
