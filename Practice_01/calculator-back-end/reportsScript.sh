@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Get today's date in the format used in logs.txt
+today_date=$(date "+%Y-%m-%d")
+
 # Count the total number of lines in the file
 total_lines=$(wc -l logs.txt | cut -d' ' -f1)
 
@@ -25,3 +28,4 @@ echo "Total Sums: $total_sums"
 echo "Total Subtractions: $total_subtractions"
 echo "Total Multiplications: $total_multiplications"
 echo "Total Divisions: $total_divisions"
+echo "Total logs registered today: $total_today"
