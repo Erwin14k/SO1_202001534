@@ -7,7 +7,9 @@ today_date=$(date "+%Y-%m-%d")
 total_lines=$(wc -l logs.txt | cut -d' ' -f1)
 
 # Count the number of occurrences of -1499 in the file
-total_errors=$(grep -c -- "-,-1499;" logs.txt)
+#total_errors=$(grep -c -- "-,-1499;" logs.txt)
+total_errors=$(grep -c '/,-\?1499\.' logs.txt)
+
 
 # Count the number of occurrences of + in the file
 total_sums=$(grep -c -- "+," logs.txt)
@@ -20,6 +22,9 @@ total_multiplications=$(grep -c -- "\*," logs.txt)
 
 # Count the number of occurrences of / in the file
 total_divisions=$(grep -c -- "/," logs.txt)
+
+# Count the number of occurrences of today's date in the file
+total_today=$(grep -c -- "$today_date" logs.txt)
 
 # Print the results
 echo "Total logs registered: $total_lines"

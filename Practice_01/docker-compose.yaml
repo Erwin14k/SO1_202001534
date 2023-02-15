@@ -30,6 +30,8 @@ services:
   linux_container:
     restart: always
     image: bash:5.2.15-alpine3.16
+    environment:
+      TZ: America/Guatemala
     volumes:
       - logs_volume:/app/Backend
     working_dir: /app/Backend

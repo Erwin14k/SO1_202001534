@@ -69,15 +69,15 @@
       mismas se encuentran a continuación:
     </p>
     <ul>
-      <li>Backend: <a>https://hub.docker.com/repository/docker/erwin14k/calculator_back_end/general</a></li>
-      <li>Frontend: <a>https://hub.docker.com/repository/docker/erwin14k/calculator-front-end/general</a></li>
+      <li><a href="https://hub.docker.com/repository/docker/erwin14k/calculator_back_end/general">Backend Calculator in Docker Hub</a></li>
+      <li><a href="https://hub.docker.com/repository/docker/erwin14k/calculator-front-end/general">Frontend Calculator in Docker Hub</a></li>
     </ul>
     <p>
       Además se utilizó una imágen para la base de datos, se utilizó la oficial
       de MySQL en su versión 8.0.32, la documentación oficial se encuentrá a continuación:
     </p>
     <ul>
-      <li><a>https://hub.docker.com/_/mysql</a></li>
+      <li><a href="https://hub.docker.com/_/mysql">MySQL in Docker Hub</a></li>
     </ul>
     <p>
       Para la base de datos se creó adicionalmente un volumen, el cuál almacenará
@@ -89,7 +89,7 @@
       a múltiples contenedores con un solo script, de manera que no haría falta
       irlos levantando uno por uno, el archivo para ejecutar el docker-compose, 
       debe ser con extensión ".yaml", los comandos tanto para iniciar un
-      docker-compose como para terminarlo se muestran a continuacióne:
+      docker-compose como para terminarlo se muestran a continuación:
     </p>
     <ul>
       <li>Levantar Contenedores: docker-compose up -d</li>
@@ -104,6 +104,45 @@
         <img src="./Images/down.png" alt="Backbone Network">
       </div>
     </ul>
-    
+    <h2>Bash Container</h2>
+    <p>
+      El contenedor de bash, es necesario para ejecutar un script, el cual
+      funciona para llevar un control en forma de reportes, este contenedor
+      comparte un volumen con el contenedor de backend, por lo cual, al haber 
+      una actualización en el archivo a analizar de parte del backend, este 
+      contenedor también puede ver reflejados los cambios y mostrar reportes
+      de manera actualizada, algunos comandos que fueron utilizados para dejar
+      configurado de manera correcta este contenedor son:
+    </p>
+    <ul>
+      <li>Copiar el script al volumen del contenedor: 
+        <ul>
+          <li>docker cp reportsScript.sh practice_01_linux_container_1:/app/Backend</li>
+        </ul>
+      </li>
+      <li>Acceder al contenedor bash: 
+        <ul>
+          <li>docker exec -it practice_01_linux_container_1 /bin/sh</li>
+        </ul>
+      </li>
+      <li>Darle permisos de ejecución al script: 
+        <ul>
+          <li>chmod +x reportsScript.sh</li>
+        </ul>
+      </li>
+      <li>Ejecutar el script: 
+        <ul>
+          <li>./reportsScript.sh</li>
+        </ul>
+      </li>
+    </ul>
+    <p>
+      La imagen utilizada para este contenedor la puedes encontrar en el siguiente 
+      enlace:
+    </p>
+    <ul>
+      <li><a href="https://hub.docker.com/_/bash">Bash in Docker Hub</a></li>
+    </ul>
+    <p>
   </body>
 </html>
