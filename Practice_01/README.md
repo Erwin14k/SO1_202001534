@@ -64,13 +64,14 @@
       La parte de docker es fundamental a la hora de poder construir una aplicación, ya
       que mediante los contenedores e imágenes que nos ofrece docker podemos utilizar 
       aplicaciones sin necesidad de instalarlas como tal, ahorrándonos mucho tiempo
-      y también recursos en nuestro ordenador, para esta aplicación se generaron 2 
-      imágenes, una para el frontend y otra para el backend, los enlaces de las 
+      y también recursos en nuestro ordenador, para esta aplicación se generaron 3 
+      imágenes, una para el frontend, otra para el backend y la última para ejecutar el script, los enlaces de las 
       mismas se encuentran a continuación:
     </p>
     <ul>
-      <li><a href="https://hub.docker.com/repository/docker/erwin14k/calculator_back_end/general">Backend Calculator in Docker Hub</a></li>
-      <li><a href="https://hub.docker.com/repository/docker/erwin14k/calculator-front-end/general">Frontend Calculator in Docker Hub</a></li>
+      <li><a href="https://hub.docker.com/repository/docker/erwin14k/backend_practica1_202001534/general">Backend Calculator in Docker Hub</a></li>
+      <li><a href="https://hub.docker.com/repository/docker/erwin14k/frontend_practica1_202001534/general">Frontend Calculator in Docker Hub</a></li>
+      <li><a href="https://hub.docker.com/repository/docker/erwin14k/script_practica1_202001534/general">Reports Script in Docker Hub</a></li>
     </ul>
     <p>
       Además se utilizó una imágen para la base de datos, se utilizó la oficial
@@ -83,6 +84,18 @@
       Para la base de datos se creó adicionalmente un volumen, el cuál almacenará
       toda la información, incluso si el contenedor está detenido.
     </p>
+    <p>
+      Además es posible ingresar a interactuar en los
+      contenedores mediante una terminal, aquí te muestro
+      un ejemplo de como ingresar a la base de datos de esta aplicación en concreto:
+    </p>
+    <ul>
+      <li>Acceder al contenedor de la base de datos: 
+        <ul>
+          <li>docker exec -it practice_01_db_1 mysql -uroot -pcalcpass</li>
+        </ul>
+      </li>
+    </ul>
     <h2>Docker-Compose</h2>
     <p>
       Docker-Compose nos permite de manera rápida y eficiente poder darle vida
@@ -136,13 +149,5 @@
         </ul>
       </li>
     </ul>
-    <p>
-      La imagen utilizada para este contenedor la puedes encontrar en el siguiente 
-      enlace:
-    </p>
-    <ul>
-      <li><a href="https://hub.docker.com/_/bash">Bash in Docker Hub</a></li>
-    </ul>
-    <p>
   </body>
 </html>
