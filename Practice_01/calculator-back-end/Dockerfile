@@ -1,9 +1,9 @@
 # Build
-#docker build -t calculator_back_end:1.00 .
+# docker build -t backend_practica1_202001534:1.00 .
 # Tag
-# docker tag calculator_back_end:1.00 erwin14k/calculator_back_end:1.00
+# docker tag backend_practica1_202001534:1.00 erwin14k/backend_practica1_202001534:1.00
 # Push
-# docker push erwin14k/calculator_back_end:1.00
+# docker push erwin14k/backend_practica1_202001534:1.00
 
 
 # The Alpine base image for a smaller size of the resulting image

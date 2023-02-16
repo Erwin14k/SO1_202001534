@@ -1,16 +1,9 @@
-## Build
-# docker build -t calculator-front-end:1.00 .
-
-## Run
-# docker run -p 3000:3000 -d calculator-front-end:1.00
-
+# Build
+# docker build -t frontend_practica1_202001534:1.00 .
 # Tag
-# docker tag calculator-front-end:1.00 erwin14k/calculator-front-end:1.00
+# docker tag frontend_practica1_202001534:1.00 erwin14k/frontend_practica1_202001534:1.00
 # Push
-# docker push erwin14k/calculator-front-end:1.00
-
-## Enter to the component
-# docker run -it full-front:0.1.0 /bin/bash
+# docker push erwin14k/frontend_practica1_202001534:1.00
 
 # Nonde alpine image
 FROM node:alpine
