@@ -1,7 +1,7 @@
 -- Resource Table
 CREATE TABLE IF NOT EXISTS resource (
 	resource INT PRIMARY KEY AUTO_INCREMENT,
-    date_resource NOT NULL,
+    date_resource DATETIME NOT NULL,
     cpu_data FLOAT NOT NULL,
     ram_data FLOAT NOT NULL
 );
