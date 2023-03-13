@@ -1,10 +1,10 @@
-import { config } from 'dotenv';
-import { createConnection } from 'mysql';
-config();
+const dotenv = require('dotenv');
+var mysql = require('mysql')
+dotenv.config();
 
 
 // Database connecion configration
-const connection = createConnection({
+const connection = mysql.createConnection({
     host: process.env.HOST,
     user: process.env.USER,
     password: process.env.PASSWORD,

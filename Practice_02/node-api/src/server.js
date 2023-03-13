@@ -1,9 +1,12 @@
 const express = require('express');
+const processesQuery = require('./processesQuery');
+
+// Express app Configuration
 const app = express();
 app.use(express.json());
 app.use(cors());
-processesQuery
-const processesQuery = require('./processesQuery');
+
+
 // Principal route of the server
 app.get('/', (req, res) => {
     res.send('Hi from backend, we are working hard!!');
@@ -23,7 +26,7 @@ app.get('/cpu-ram', async (req, res) => {
 // Get processes route
 app.get('/processes', async (req, res) => {
     try {
-        await fillTemporal();
+        await processesQuery();
         res.send('Temporal Table Loaded Successfully!!');
     } catch (err) {
         console.error(err);
