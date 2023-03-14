@@ -35,8 +35,9 @@ type Parent struct {
 
 // Ram Struct
 type Ram struct {
-	TotalRam int `json:"totalram"`
-	FreeRam  int `json:"freeram"`
+	TotalRam    int `json:"total_ram"`
+	FreeRam     int `json:"free_ram"`
+	OccupiedRam int `json:"ram_occupied"`
 }
 
 // Mysql DB Connection
@@ -94,7 +95,7 @@ func main() {
 			fmt.Println(unmarshallData)
 		}
 
-		query := `INSERT INTO resource(date_resource,cpu_data,ram_data) VALUES (NOW(),?,?);`
+		/*query := `INSERT INTO resource(date_resource,cpu_data,ram_data) VALUES (NOW(),?,?);`
 		result, er := conn.Exec(query, temporalData.Cpu, float64(temporalData.Ram.TotalRam-temporalData.Ram.FreeRam)*100/float64(temporalData.Ram.TotalRam))
 		if er != nil {
 			fmt.Println(er)
@@ -159,6 +160,8 @@ func main() {
 					chState = "Stopped"
 				case 8:
 					chState = "Zombie"
+				case 32:
+					chState = "Zombie"
 				default:
 					chState = "Suspended"
 				}
@@ -167,6 +170,101 @@ func main() {
 					fmt.Println(error3)
 				}
 			}
+		}
+		*/
+		tx, err := conn.Begin()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		defer tx.Rollback()
+		// Insert resource
+		query := `INSERT INTO resource(date_resource,cpu_data,ram_data) VALUES (NOW(),?,?);`
+		result, err := tx.Exec(query, temporalData.Cpu, float64(temporalData.Ram.OccupiedRam/temporalData.Ram.TotalRam)*100)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		resourceId, err := result.LastInsertId()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		// Insert processes and their children
+		var stmt *sql.Stmt
+		query = `INSERT INTO process(pid, name, user, status, ram_percentage, parent_process, resource) VALUES (?, ?, ?, ?, ?, ?, ?);`
+		stmt, err = tx.Prepare(query)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		defer stmt.Close()
+		for i := 0; i < len(temporalData.Procs); i++ {
+			temporalProc := temporalData.Procs[i]
+			if len(temporalProc.Children) > 0 {
+				// Insert parent process
+				state := ""
+				switch temporalProc.Status {
+				case 0:
+					state = "Running"
+				case 1:
+					state = "Suspended"
+				case 2:
+					state = "Suspended"
+				case 4:
+					state = "Stopped"
+				case 32:
+					state = "Zombie"
+				default:
+					state = "Suspended"
+				}
+				res, err := stmt.Exec(temporalProc.Pid, temporalProc.Name, temporalProc.User, state, float64(temporalProc.Ram)/float64(temporalData.Ram.TotalRam), nil, resourceId)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				parentId, err := res.LastInsertId()
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				// Insert children processes
+				for j := 0; j < len(temporalProc.Children); j++ {
+					ch := temporalProc.Children[j]
+					for k := 0; k < len(temporalData.Procs); k++ {
+						pr := temporalData.Procs[k]
+						if pr.Pid == ch {
+							chState := ""
+							switch pr.Status {
+							case 0:
+								chState = "Running"
+							case 1:
+								chState = "Suspended"
+							case 2:
+								chState = "Suspended"
+							case 4:
+								chState = "Stopped"
+							case 8:
+								chState = "Zombie"
+							case 32:
+								chState = "Zombie"
+							default:
+								chState = "Suspended"
+							}
+							_, err = stmt.Exec(pr.Pid, pr.Name, pr.User, chState, float64(pr.Ram)/float64(temporalData.Ram.TotalRam), parentId, resourceId)
+							if err != nil {
+								fmt.Println(err)
+								return
+							}
+						}
+					}
+				}
+			}
+		}
+		err = tx.Commit()
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
 		fmt.Println("Finished Round")
 		time.Sleep(5 * time.Second)

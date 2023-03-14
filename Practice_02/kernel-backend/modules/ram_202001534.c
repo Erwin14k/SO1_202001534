@@ -1,13 +1,18 @@
+// This library provides functions and structures necessary to create and manage Linux kernel modules.
 #include <linux/module.h>
-// Header KERN_INFO
+/* This library provides functions and macros for printing messages to the kernel console, including 
+macros like printk() and KERN_INFO.*/
 #include <linux/kernel.h>
-
-//Header module_init & module_exit
+/* This library defines the module_init() and module_exit() macros to register the module's 
+initialization and exit function, respectively.*/
 #include <linux/init.h>
-//Header proc_fs
+/* This library provides functions and structures for creating and managing files in the procfs file 
+system, which provides a user interface for accessing kernel information and statistics.*/
 #include <linux/proc_fs.h>
+// This library provides functions to copy data between user space and kernel space.
 #include <asm/uaccess.h>	
-// seq_file library
+/* This library provides functions and structures for writing data to stream files. Stream files are an 
+efficient way to write large amounts of data to a file without having to store everything in memory.*/
 #include <linux/seq_file.h>
 // Sysinfo alternative
 #include <linux/hugetlb.h>
@@ -20,11 +25,17 @@ MODULE_AUTHOR("Erwin Fernando Vásquez Peñate");
 static int write_file(struct seq_file *file, void *v){   
     struct sysinfo info;
     si_meminfo(&info);
-    seq_printf(file, "{\"totalram\":");
-    seq_printf(file, "%ld", info.totalram);
-    seq_printf(file, ",\"freeram\":");
-    seq_printf(file, "%ld", info.freeram);
-    seq_printf(file, "}");
+    // Capture data in mb.
+    // Total ram
+    seq_printf(file, "{\"total_ram\":");
+    seq_printf(file, "%ld", info.totalram* info.mem_unit / 1024/ 1024);
+    // Free ram
+    seq_printf(file, ",\"free_ram\":");
+    seq_printf(file, "%ld", info.freeram* info.mem_unit / 1024 / 1024);
+    // Occupied ram
+    seq_printf(file, ",\"ram_occupied\":");
+    seq_printf(file, "%ld", (info.totalram-info.freeram) * info.mem_unit / 1024 / 1024);
+    seq_printf(file, "}\n");
     return 0;
 }
 
