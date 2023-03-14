@@ -45,7 +45,7 @@ var connection = MySQLConn()
 
 // Connection function
 func MySQLConn() *sql.DB {
-	connString := "root:secret@tcp(:3306)/practice02"
+	connString := "root:secret@tcp(34.133.134.153:3306)/practice02"
 	connection, error1 := sql.Open("mysql", connString)
 	if error1 != nil {
 		fmt.Println(error1)
