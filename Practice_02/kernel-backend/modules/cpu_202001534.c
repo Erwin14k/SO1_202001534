@@ -35,28 +35,42 @@ of a process.*/
 struct list_head* lstProcess;
 
 //Function that will be executed every time the file is read with the CAT command
-static int write_file(struct seq_file *the_file, void *v) {
-    struct task_struct *task, *child_task;
-    struct list_head *list;
+static int write_file(struct seq_file *the_file, void *v){   
+    int ram, split, child_split;
+    split = 0;
+    child_split = 0;
     seq_printf(the_file, "[");
-    for (task = &init_task; (task = next_task(task)) != &init_task;) {
-        seq_printf(the_file, "{\"pid\":%d,\"name\":\"%s\",\"user\":%d,\"status\":%d",
-            task_pid_nr(task), task->comm, task_uid(task), task->state);
-        if (task->mm) {
-            seq_printf(the_file, ",\"ram\":%ld", task_rss(task) << (PAGE_SHIFT - 20));
+    for_each_process(cpu){
+        if(split){
+            seq_printf(the_file, ",");
+        }
+        seq_printf(the_file, "{\"pid\":");
+        seq_printf(the_file, "%d", cpu->pid);
+        seq_printf(the_file, ",\"name\":");
+        seq_printf(the_file, "\"%s\"", cpu->comm);
+        seq_printf(the_file, ",\"user\":");
+        seq_printf(the_file, "%d", cpu->real_cred->uid);
+        seq_printf(the_file, ",\"status\":");
+        seq_printf(the_file, "%d", cpu->__state);
+        if (cpu->mm) {
+            ram = (get_mm_rss(cpu->mm)<<PAGE_SHIFT)/(1024*1024);
+            seq_printf(the_file, ",\"ram\":");
+            seq_printf(the_file, "%d", ram);
         }
         seq_printf(the_file, ",\"children\":[");
-        list_for_each_entry(child_task, &task->children, sibling) {
-            seq_printf(the_file, "%d,", task_pid_nr(child_task));
+        child_split = 0;
+        list_for_each(lstProcess, &(cpu->children)){
+            child = list_entry(lstProcess, struct task_struct, sibling);
+            if(child_split){
+                seq_printf(the_file, ",");
+            }
+            seq_printf(the_file, "%d", child->pid);
+            child_split = 1;
         }
-        if (!list_empty(&task->children)) {
-            the_file->buf[the_file->count-1] = ']';
-        } else {
-            seq_printf(the_file, "]");
-        }
-        seq_printf(the_file, "},");
+        seq_printf(the_file, "]}\n");
+        split = 1;
     }
-    the_file->buf[the_file->count-1] = ']';
+    seq_printf(the_file, "]\n");
     return 0;
 }
 

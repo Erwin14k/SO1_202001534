@@ -63,7 +63,7 @@ app.get("/get-processes", async (req, res) => {
   // Send the data
   res.send({
     ...processCounts,
-    totalProcesses: result.length,
+    TotalProcesses: result.length,
     processes,
   });
 });

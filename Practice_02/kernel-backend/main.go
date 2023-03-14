@@ -41,22 +41,23 @@ type Ram struct {
 }
 
 // Mysql DB Connection
-var conn = MySQLConn()
+var connection = MySQLConn()
 
+// Connection function
 func MySQLConn() *sql.DB {
 	connString := "root:secret@tcp(:3306)/practice02"
-	conn, error1 := sql.Open("mysql", connString)
+	connection, error1 := sql.Open("mysql", connString)
 	if error1 != nil {
 		fmt.Println(error1)
 	} else {
 		fmt.Println("Connection MySQL")
 	}
-	if err := conn.Ping(); err != nil {
+	if err := connection.Ping(); err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println("Successfully connected to the database")
 	}
-	return conn
+	return connection
 }
 
 func main() {
@@ -94,115 +95,49 @@ func main() {
 		if unmarshallData != nil {
 			fmt.Println(unmarshallData)
 		}
-
-		/*query := `INSERT INTO resource(date_resource,cpu_data,ram_data) VALUES (NOW(),?,?);`
-		result, er := conn.Exec(query, temporalData.Cpu, float64(temporalData.Ram.TotalRam-temporalData.Ram.FreeRam)*100/float64(temporalData.Ram.TotalRam))
-		if er != nil {
-			fmt.Println(er)
-		}
-
-		resourceId, _ := result.LastInsertId()
-
-		var parents []*Parent
-
-		for i := 0; i < len(temporalData.Procs); i++ {
-			temporalProc := temporalData.Procs[i]
-			if len(temporalProc.Children) > 0 {
-				var parent Parent
-				parent.Value = &temporalProc
-				for j := 0; j < len(temporalProc.Children); j++ {
-					c := temporalProc.Children[j]
-					for k := 0; k < len(temporalData.Procs); k++ {
-						pr := temporalData.Procs[k]
-						if pr.Pid == c {
-							parent.Children = append(parent.Children, &pr)
-						}
-					}
-				}
-				parents = append(parents, &parent)
-			}
-		}
-		for i := 0; i < len(parents); i++ {
-			temporalParent := *parents[i].Value
-			query := `INSERT INTO process (pid,name,user,status,ram_percentage,resource) VALUES (?,?,?,?,?,?);`
-			state := ""
-			switch temporalParent.Status {
-			case 0:
-				state = "Running"
-			case 1:
-				state = "Suspended"
-			case 2:
-				state = "Suspended"
-			case 4:
-				state = "Stopped"
-			case 32:
-				state = "Zombie"
-			default:
-				state = "Suspended"
-			}
-			res, error2 := conn.Exec(query, temporalParent.Pid, temporalParent.Name, temporalParent.User, state, float64(temporalParent.Ram)/float64(temporalData.Ram.TotalRam), resourceId)
-			if error2 != nil {
-				fmt.Println(error2)
-			}
-			parentId, _ := res.LastInsertId()
-			for j := 0; j < len(parents[i].Children); j++ {
-				query2 := `INSERT INTO process(pid, name, user, status, ram_percentage, parent_process, resource) VALUES (?,?,?,?,?,?,?);`
-				ch := *parents[i].Children[j]
-				chState := ""
-				switch ch.Status {
-				case 0:
-					chState = "Running"
-				case 1:
-					chState = "Suspended"
-				case 2:
-					chState = "Suspended"
-				case 4:
-					chState = "Stopped"
-				case 8:
-					chState = "Zombie"
-				case 32:
-					chState = "Zombie"
-				default:
-					chState = "Suspended"
-				}
-				_, error3 := conn.Exec(query2, ch.Pid, ch.Name, ch.User, chState, float64(ch.Ram)/float64(temporalData.Ram.TotalRam), parentId, resourceId)
-				if error3 != nil {
-					fmt.Println(error3)
-				}
-			}
-		}
-		*/
-		tx, err := conn.Begin()
+		// Start a transaction on the connection.
+		tx, err := connection.Begin()
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
+		// If an error occurs, a Rollback (undo changes) is performed before the function ends.
 		defer tx.Rollback()
-		// Insert resource
+		/* The "query" variable is the SQL query for the insert. The values ​​of "temporalData.Cpu" 
+		and "temporalData.Ram.TotalRam-temporalData.Ram.FreeRam)*100/float64(temporalData.Ram.TotalRam)" 
+		are inserted into the "cpu_data" and "ram_data" fields respectively.
+		*/
 		query := `INSERT INTO resource(date_resource,cpu_data,ram_data) VALUES (NOW(),?,?);`
-		result, err := tx.Exec(query, temporalData.Cpu, float64(temporalData.Ram.OccupiedRam/temporalData.Ram.TotalRam)*100)
+		result, err := tx.Exec(query, temporalData.Cpu,float64(temporalData.Ram.OccupiedRam) / float64(temporalData.Ram.TotalRam) * 100)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
+		/* Gets the ID of the newly inserted row in the "resourceId" variable. If there are 
+		any errors during the execution of the query, the error is printed to the console.
+		*/
 		resourceId, err := result.LastInsertId()
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		// Insert processes and their children
+		// Insert processes and their children in the table 'process'
 		var stmt *sql.Stmt
 		query = `INSERT INTO process(pid, name, user, status, ram_percentage, parent_process, resource) VALUES (?, ?, ?, ?, ?, ?, ?);`
+		// Prepare the query to avoid SQL injections.
 		stmt, err = tx.Prepare(query)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
+		// Close the declaration when the function ends.
 		defer stmt.Close()
+		/* The processes obtained in 'temporalData' are traversed to insert them into the 
+		'process' table*/
 		for i := 0; i < len(temporalData.Procs); i++ {
 			temporalProc := temporalData.Procs[i]
 			if len(temporalProc.Children) > 0 {
-				// Insert parent process
+				// Status control
 				state := ""
 				switch temporalProc.Status {
 				case 0:
@@ -223,6 +158,7 @@ func main() {
 					fmt.Println(err)
 					return
 				}
+				// Get the ID of the inserted parent process
 				parentId, err := res.LastInsertId()
 				if err != nil {
 					fmt.Println(err)
@@ -261,11 +197,13 @@ func main() {
 				}
 			}
 		}
+		// Confirm all the operations
 		err = tx.Commit()
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
+		// Round of processes finished
 		fmt.Println("Finished Round")
 		time.Sleep(5 * time.Second)
 	}

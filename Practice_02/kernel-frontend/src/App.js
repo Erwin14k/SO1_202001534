@@ -49,14 +49,6 @@ function App() {
     }
     getData();
   }, []);
-  const {
-    Running,
-    Stopped,
-    Suspended,
-    Zombie,
-    TotalProcesses,
-    processes
-  } = processesData;
   
   // Render principal dashboard
   return (
@@ -79,7 +71,7 @@ function App() {
           </Col>
         </Row>
       </Container>
-      <ProcessesData running={Running} stopped={Stopped} suspended={Suspended} zombie={Zombie} totalProcesses={TotalProcesses}/>
+      <ProcessesData running={processesData.Running ?? 0} stopped={processesData.Stopped ?? 0} suspended={processesData.Suspended ?? 0} zombie={processesData.Zombie ?? 0} totalProcesses={processesData.TotalProcesses ?? 0}/>
     </>
   );
 }
