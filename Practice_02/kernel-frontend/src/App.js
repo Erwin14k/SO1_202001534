@@ -1,13 +1,64 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.module.css";
 import React from "react";
+import { useState,useEffect } from "react";
 // Bootstrap Components Imports
 import { Container, Col, Row } from "react-bootstrap";
 // Components Imports
 import Resource from "./GraphicsComponents/Resource";
-//import ProcessesData from "./ProcessesComponents/ProcessesData";
+import ProcessesData from "./ProcessesComponents/ProcessesData";
 
 function App() {
+  // processData information
+  const [processesData, setProcessesData] = useState({
+    Running: 0,
+    Stopped: 0,
+    Suspended: 0,
+    Zombie: 0,
+    TotalProcesses: 0,
+    processes: []
+  });
+  // Cpu & Ram stats
+  const [ram, setRam] = useState(0);
+  const [cpu, setCpu] = useState(0);
+  // UseEffect to update the data
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        // Get Processes Petition
+        const processesResponse = await fetch('http://localhost:8080/get-processes');
+        // Json format
+        const processesData = await processesResponse.json();
+        // Get Cpu & Ram Stats
+        const cpuRamResponse = await fetch('http://localhost:8080/cpu-ram');
+        // Json format
+        const { cpu_data, ram_data } = await cpuRamResponse.json();
+        
+        // Set the new data
+        setProcessesData(processesData);
+        setCpu(cpu_data);
+        setRam(ram_data);
+        // Timer configuration
+        const timer = setTimeout(() => {
+          setProcessesData({ ...processesData });
+        }, 10000);
+        return () => clearTimeout(timer);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getData();
+  }, []);
+  const {
+    Running,
+    Stopped,
+    Suspended,
+    Zombie,
+    TotalProcesses,
+    processes
+  } = processesData;
+  
+  // Render principal dashboard
   return (
     <>
       <Container
@@ -21,13 +72,14 @@ function App() {
         </Row>
         <Row>
           <Col>
-            <Resource title={`CPU ${53.45}%`} percentageUsed={53.45} />
+            <Resource title={`CPU ${cpu}%`} percentageUsed={cpu} />
           </Col>
           <Col>
-            <Resource title={`CPU ${12.45}%`} percentageUsed={12.45} />
+            <Resource title={`RAM ${ram}%`} percentageUsed={ram} />
           </Col>
         </Row>
       </Container>
+      <ProcessesData running={Running} stopped={Stopped} suspended={Suspended} zombie={Zombie} totalProcesses={TotalProcesses}/>
     </>
   );
 }

@@ -50,6 +50,11 @@ func MySQLConn() *sql.DB {
 	} else {
 		fmt.Println("Connection MySQL")
 	}
+	if err := conn.Ping(); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Successfully connected to the database")
+	}
 	return conn
 }
 
@@ -157,13 +162,13 @@ func main() {
 				default:
 					chState = "Suspended"
 				}
-				_, er3 := conn.Exec(query2, ch.Pid, ch.Name, ch.User, chState, float64(ch.Ram)/float64(temporalData.Ram.TotalRam), parentId, resourceId)
-				if er3 != nil {
-					fmt.Println(er3)
+				_, error3 := conn.Exec(query2, ch.Pid, ch.Name, ch.User, chState, float64(ch.Ram)/float64(temporalData.Ram.TotalRam), parentId, resourceId)
+				if error3 != nil {
+					fmt.Println(error3)
 				}
 			}
 		}
-		fmt.Println(resourceId)
-		time.Sleep(1 * time.Second)
+		fmt.Println("Finished Round")
+		time.Sleep(5 * time.Second)
 	}
 }
