@@ -33,6 +33,7 @@ struct task_struct* child;
 /* lstProcess is a pointer to a data structure that is used to traverse the list of child processes
 of a process.*/
 struct list_head* lstProcess;
+static int cpu_percentage(void);
 
 //Function that will be executed every time the file is read with the CAT command
 static int write_file(struct seq_file *the_file, void *v){   
@@ -79,17 +80,18 @@ static int write_file(struct seq_file *the_file, void *v){
     return 0;
 }
 
-
+// Function to calculate the cpu percentage
 static int cpu_percentage(void){
     struct file *the_file;
     char lecture[256];
     int user,niced,system,idle,iowait,irq,suaveirq,steal,guest,guest_nice;
-    int total, percentage;
+    int total;
+    int percentage;
     the_file=filp_open("/proc/stat",O_RDONLY,0);
     memset(lecture,0,sizeof(lecture));
     kernel_read(the_file,lecture,sizeof(lecture)-1,&the_file->f_pos);
     sscanf(lecture,"cpu %d %d %d %d %d %d %d %d %d %d",
-        &user,&niced,&system,&idle,&iowait,&irq,suaveirq,&steal,&guest,&guest_nice);
+        &user,&niced,&system,&idle,&iowait,&irq,&suaveirq,&steal,&guest,&guest_nice);
     total=user+niced+system+idle+iowait+irq+suaveirq+steal+guest+guest_nice;
     percentage=100-(idle*100/total);
     filp_close(the_file,NULL);

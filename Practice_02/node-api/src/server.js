@@ -28,10 +28,10 @@ app.get("/cpu-ram", async (req, res) => {
   try {
     // Execute the query
     const result = await query(
-      `SELECT * FROM resource r ORDER BY r.resource DESC LIMIT 2;`
+      `SELECT * FROM resource r ORDER BY r.resource DESC LIMIT 1;`
     );
     // Define the important data
-    const dataToSend = result.length > 1 ? result[1] : result[0];
+    const dataToSend = result[0];
     // Send the query result
     res.send(dataToSend);
   } catch (error) {

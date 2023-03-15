@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
-	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -67,49 +67,32 @@ func main() {
 	var output [3]string
 
 	for {
-		cmd := exec.Command("sh", "-c", "cat /proc/stat | grep cpu | tail -1 | awk '{print ($5*100)/($2+$3+$4+$5+$6+$7+$8+$9+$10)}' | awk '{print 100-$1}'")
-		out[0], error1[0] = cmd.CombinedOutput()
-
-		if error1[0] != nil {
-			fmt.Println(error1[0])
-		}
-		output[0] = string(out[0][:len(out[0])-1])
-
+		// Cat to the ram module
 		cmdram := exec.Command("sh", "-c", "cat /proc/ram_202001534")
 		out[1], error1[1] = cmdram.CombinedOutput()
 		if error1[1] != nil {
 			fmt.Println(error1[1])
 		}
+		// Save the ram module information on the output array
 		output[1] = string(out[1][:])
 
-		/*cmdcpu := exec.Command("sh", "-c", "cat /proc/cpu_202001534")
-		out[2], error1[2] = cmdcpu.CombinedOutput()
-		if error1[2] != nil {
-			fmt.Println(error1[2])
-		}
-		output[2] = string(out[2][:])*/
-
+		// Cat to the cpu module
 		cmdcpu := exec.Command("sh", "-c", "cat /proc/cpu_202001534")
 		out[2], error1[2] = cmdcpu.CombinedOutput()
 		if error1[2] != nil {
 			fmt.Println(error1[2])
 		}
 		output[2] = string(out[2][:])
-
-		var decodedOutput []json.RawMessage
-		err := json.Unmarshal([]byte(output[2]), &decodedOutput)
-		if err != nil {
-			fmt.Println(err)
-		}
-		var cpuValue int
-		err = json.Unmarshal(decodedOutput[0], &cpuValue)
-		if err != nil {
-			fmt.Println(err)
-		}
-		cpu_value := strconv.Itoa(cpuValue)
-		output[2] = string(decodedOutput[1])
-
-		jsonstring := fmt.Sprintf("{\"cpu\":%s,\"ram\":%s,\"procs\":%s}", cpu_value, output[1], output[2])
+		// Split the cpu module information
+		parts := strings.Split(output[2], "],")
+		// Get the cpu value
+    cpuValue := parts[0]
+		cpuValue=strings.TrimPrefix(cpuValue, string(cpuValue[0]))
+		// Save the cpu value on the output array
+		output[0]=cpuValue
+		output[2]=parts[1]
+		// Json output
+		jsonstring := fmt.Sprintf("{\"cpu\":%s,\"ram\":%s,\"procs\":%s}", output[0], output[1], output[2])
 
 		var temporalData Resource
 		unmarshallData := json.Unmarshal([]byte(jsonstring), &temporalData)
