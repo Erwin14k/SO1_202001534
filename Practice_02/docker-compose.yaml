@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+  frontend:
+    restart: always
+    image: erwin14k/so1_practice02_frontend:1.00
+    ports:
+      - "3000:3000"
+  api:
+    restart: always
+    image: erwin14k/so1_practice02_api:1.00
+    ports:
+      - "8080:8080"
