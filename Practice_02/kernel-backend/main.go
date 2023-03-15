@@ -65,7 +65,7 @@ func main() {
 	var out [3][]byte
 	var error1 [5]error
 	var output [3]string
-
+	// Infinite loop
 	for {
 		// Cat to the ram module
 		cmdram := exec.Command("sh", "-c", "cat /proc/ram_202001534")
@@ -75,7 +75,6 @@ func main() {
 		}
 		// Save the ram module information on the output array
 		output[1] = string(out[1][:])
-
 		// Cat to the cpu module
 		cmdcpu := exec.Command("sh", "-c", "cat /proc/cpu_202001534")
 		out[2], error1[2] = cmdcpu.CombinedOutput()
@@ -86,14 +85,14 @@ func main() {
 		// Split the cpu module information
 		parts := strings.Split(output[2], "],")
 		// Get the cpu value
-    cpuValue := parts[0]
-		cpuValue=strings.TrimPrefix(cpuValue, string(cpuValue[0]))
+		cpuValue := parts[0]
+		cpuValue = strings.TrimPrefix(cpuValue, string(cpuValue[0]))
 		// Save the cpu value on the output array
-		output[0]=cpuValue
-		output[2]=parts[1]
+		output[0] = cpuValue
+		output[2] = parts[1]
 		// Json output
 		jsonstring := fmt.Sprintf("{\"cpu\":%s,\"ram\":%s,\"procs\":%s}", output[0], output[1], output[2])
-
+		// Temporal Resource Struct
 		var temporalData Resource
 		unmarshallData := json.Unmarshal([]byte(jsonstring), &temporalData)
 		if unmarshallData != nil {
