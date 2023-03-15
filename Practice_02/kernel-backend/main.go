@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"strconv"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -81,6 +82,13 @@ func main() {
 		}
 		output[1] = string(out[1][:])
 
+		/*cmdcpu := exec.Command("sh", "-c", "cat /proc/cpu_202001534")
+		out[2], error1[2] = cmdcpu.CombinedOutput()
+		if error1[2] != nil {
+			fmt.Println(error1[2])
+		}
+		output[2] = string(out[2][:])*/
+
 		cmdcpu := exec.Command("sh", "-c", "cat /proc/cpu_202001534")
 		out[2], error1[2] = cmdcpu.CombinedOutput()
 		if error1[2] != nil {
@@ -88,7 +96,20 @@ func main() {
 		}
 		output[2] = string(out[2][:])
 
-		jsonstring := fmt.Sprintf("{\"cpu\":%s,\"ram\":%s,\"procs\":%s}", output[0], output[1], output[2])
+		var decodedOutput []json.RawMessage
+		err := json.Unmarshal([]byte(output[2]), &decodedOutput)
+		if err != nil {
+			fmt.Println(err)
+		}
+		var cpuValue int
+		err = json.Unmarshal(decodedOutput[0], &cpuValue)
+		if err != nil {
+			fmt.Println(err)
+		}
+		cpu_value := strconv.Itoa(cpuValue)
+		output[2] = string(decodedOutput[1])
+
+		jsonstring := fmt.Sprintf("{\"cpu\":%s,\"ram\":%s,\"procs\":%s}", cpu_value, output[1], output[2])
 
 		var temporalData Resource
 		unmarshallData := json.Unmarshal([]byte(jsonstring), &temporalData)
@@ -103,17 +124,17 @@ func main() {
 		}
 		// If an error occurs, a Rollback (undo changes) is performed before the function ends.
 		defer tx.Rollback()
-		/* The "query" variable is the SQL query for the insert. The values ​​of "temporalData.Cpu" 
-		and "temporalData.Ram.TotalRam-temporalData.Ram.FreeRam)*100/float64(temporalData.Ram.TotalRam)" 
+		/* The "query" variable is the SQL query for the insert. The values ​​of "temporalData.Cpu"
+		and "temporalData.Ram.TotalRam-temporalData.Ram.FreeRam)*100/float64(temporalData.Ram.TotalRam)"
 		are inserted into the "cpu_data" and "ram_data" fields respectively.
 		*/
 		query := `INSERT INTO resource(date_resource,cpu_data,ram_data) VALUES (NOW(),?,?);`
-		result, err := tx.Exec(query, temporalData.Cpu,float64(temporalData.Ram.OccupiedRam) / float64(temporalData.Ram.TotalRam) * 100)
+		result, err := tx.Exec(query, temporalData.Cpu, float64(temporalData.Ram.OccupiedRam)/float64(temporalData.Ram.TotalRam)*100)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		/* Gets the ID of the newly inserted row in the "resourceId" variable. If there are 
+		/* Gets the ID of the newly inserted row in the "resourceId" variable. If there are
 		any errors during the execution of the query, the error is printed to the console.
 		*/
 		resourceId, err := result.LastInsertId()
@@ -132,7 +153,7 @@ func main() {
 		}
 		// Close the declaration when the function ends.
 		defer stmt.Close()
-		/* The processes obtained in 'temporalData' are traversed to insert them into the 
+		/* The processes obtained in 'temporalData' are traversed to insert them into the
 		'process' table*/
 		for i := 0; i < len(temporalData.Procs); i++ {
 			temporalProc := temporalData.Procs[i]

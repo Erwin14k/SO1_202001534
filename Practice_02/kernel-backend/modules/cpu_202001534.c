@@ -39,6 +39,11 @@ static int write_file(struct seq_file *the_file, void *v){
     int ram, split, child_split;
     split = 0;
     child_split = 0;
+    int percentage;
+    percentage=cpu_percentage();
+    seq_printf(the_file, "[");
+    seq_printf(the_file, "%ld",percentage);
+    seq_printf(the_file, "],\n");
     seq_printf(the_file, "[");
     for_each_process(cpu){
         if(split){
@@ -74,6 +79,22 @@ static int write_file(struct seq_file *the_file, void *v){
     return 0;
 }
 
+
+static int cpu_percentage(void){
+    struct file *the_file;
+    char lecture[256];
+    int user,niced,system,idle,iowait,irq,suaveirq,steal,guest,guest_nice;
+    int total, percentage;
+    the_file=filp_open("/proc/stat",O_RDONLY,0);
+    memset(lecture,0,sizeof(lecture));
+    kernel_read(the_file,lecture,sizeof(lecture)-1,&the_file->f_pos);
+    sscanf(lecture,"cpu %d %d %d %d %d %d %d %d %d %d",
+        &user,&niced,&system,&idle,&iowait,&irq,suaveirq,&steal,&guest,&guest_nice);
+    total=user+niced+system+idle+iowait+irq+suaveirq+steal+guest+guest_nice;
+    percentage=100-(idle*100/total);
+    filp_close(the_file,NULL);
+    return percentage;    
+}
 
 //Function that will be executed every time the file is read with the CAT command
 static int when_open(struct inode *inode, struct file *file){
