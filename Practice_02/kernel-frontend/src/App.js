@@ -7,6 +7,7 @@ import { Container, Col, Row } from "react-bootstrap";
 // Components Imports
 import Resource from "./GraphicsComponents/Resource";
 import ProcessesData from "./ProcessesComponents/ProcessesData";
+import ProcessesTable from "./ProcessesComponents/ProcessesTable";
 
 function App() {
   // processData information
@@ -49,7 +50,6 @@ function App() {
     }
     getData();
   }, []);
-  
   // Render principal dashboard
   return (
     <>
@@ -71,7 +71,10 @@ function App() {
           </Col>
         </Row>
       </Container>
+      <div style={{ display: 'grid', gap: '60px' }}>
       <ProcessesData running={processesData.Running ?? 0} stopped={processesData.Stopped ?? 0} suspended={processesData.Suspended ?? 0} zombie={processesData.Zombie ?? 0} totalProcesses={processesData.TotalProcesses ?? 0}/>
+      <ProcessesTable processes={processesData.processes}/>
+      </div>
     </>
   );
 }
