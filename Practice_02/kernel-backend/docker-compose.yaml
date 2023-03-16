@@ -1,0 +1,7 @@
+version: "3.7"
+services:
+  backend:
+    restart: always
+    image: erwin14k/so1_practice02_backend:1.00
+    volumes:
+      - /proc:/proc
