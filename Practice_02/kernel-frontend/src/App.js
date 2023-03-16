@@ -73,7 +73,7 @@ function App() {
       </Container>
       <div style={{ display: 'grid', gap: '60px' }}>
       <ProcessesData running={processesData.Running ?? 0} stopped={processesData.Stopped ?? 0} suspended={processesData.Suspended ?? 0} zombie={processesData.Zombie ?? 0} totalProcesses={processesData.TotalProcesses ?? 0}/>
-      <ProcessesTable processes={processesData.processes}/>
+      <ProcessesTable color="dark" processes={processesData.processes}/>
       </div>
     </>
   );
