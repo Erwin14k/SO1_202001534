@@ -27,11 +27,11 @@ function App() {
     const getData = async () => {
       try {
         // Get Processes Petition
-        const processesResponse = await fetch('34.125.150.24:8080/get-processes');
+        const processesResponse = await fetch('http://34.125.150.24:8080/get-processes');
         // Json format
         const processesData = await processesResponse.json();
         // Get Cpu & Ram Stats
-        const cpuRamResponse = await fetch('34.125.150.24:8080/cpu-ram');
+        const cpuRamResponse = await fetch('http://34.125.150.24:8080/cpu-ram');
         // Json format
         const { cpu_data, ram_data } = await cpuRamResponse.json();
         
