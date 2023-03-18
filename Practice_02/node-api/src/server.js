@@ -45,7 +45,7 @@ app.get("/cpu-ram", async (req, res) => {
 app.get("/get-processes", async (req, res) => {
   /*Constant variable result and assigns to it the result of an SQL query executed 
   by calling the query function*/
-  const result = await query(`WITH resource_id AS (SELECT (MAX(resource)) AS resource FROM resource)SELECT p.resource, p.pid, p.name, p.user, p.status, p.ram_percentage, p.parent_process FROM process p, resource_id WHERE p.resource = resource_id.resource;`);
+  const result = await query(`WITH resource_id AS (SELECT (MAX(resource)) AS resource FROM resource)SELECT p.resource, p.pid, p.name, p.user, p.status, p.ram_percentage, p.parent_process,p.process FROM process p, resource_id WHERE p.resource = resource_id.resource;`);
   /*Constant variable processCounts that is computed by calling the reduce function on
     the result array. The reduce function accumulates a count of the number of processes
     for each status, by using the status property of each process object.*/

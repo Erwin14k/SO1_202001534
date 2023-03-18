@@ -42,7 +42,7 @@ function App() {
         // Timer configuration
         const timer = setTimeout(() => {
           setProcessesData({ ...processesData });
-        }, 10000);
+        }, 4000);
         return () => clearTimeout(timer);
       } catch (error) {
         console.error(error);
