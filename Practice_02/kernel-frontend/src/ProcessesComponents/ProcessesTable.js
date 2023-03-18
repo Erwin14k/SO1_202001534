@@ -65,7 +65,7 @@ function ProcessRow(props) {
 
   function getChildProcesses() {
     return processes.filter(
-      (childProcess) => childProcess.parent_process === process.pid
+      (childProcess) => childProcess.parent_process === process.process
     );
   }
 
